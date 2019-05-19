@@ -1,0 +1,5 @@
+#Ignore all folders
+*/
+
+#Ignore Production Environments Files
+prod*.env

@@ -1,0 +1,38 @@
+version: '3.2'
+services:
+  zabbix-db:
+    image: postgres:11.3-alpine
+    env_file: 
+      - ./prod-zabbix-postgres.env
+    volumes:
+      - ./pg_data:/var/lib/postgresql/data
+
+  zabbix-server:
+    image: zabbix/zabbix-server-pgsql:alpine-4.2.1 
+    depends_on: 
+      - zabbix-db
+    volumes:
+      - ./alertscripts:/usr/lib/zabbix/alertscripts
+      - ./externalscripts:/usr/lib/zabbix/externalscripts
+      - ./modules:/var/lib/zabbix/modules
+      - ./enc:/var/lib/zabbix/enc
+      - ./ssh_keys:/var/lib/zabbix/ssh_keys
+      - ./ssl:/var/lib/zabbix/ssl/certs
+      - ./ssl:/var/lib/zabbix/ssl/keys
+      - ./ssl:/var/lib/zabbix/ssl/ssl_ca
+      - ./snmptraps:/var/lib/zabbix/snmptraps
+      - ./mibs:/var/lib/zabbix/mibs
+    env_file:
+      - ./prod-zabbix-server.env
+  
+  zabbix-web:
+    image: zabbix/zabbix-web-nginx-pgsql:alpine-4.2.1
+    env_file: 
+      - ./prod-zabbix-web.env
+    depends_on: 
+      - zabbix-db
+      - zabbix-server
+    ports:
+      - 80:80
+      - 443:443
+   
